@@ -37,6 +37,9 @@ func init() {
 
 // SetupRouter 设置路由
 func SetupRouter() *gin.Engine {
+
+	//Router.Static("/form-generator", "./view")
+
 	Router.NoRoute(func(ctx *gin.Context) {
 		ctx.String(http.StatusNotFound, "The incorrect API route.")
 	})
@@ -70,6 +73,7 @@ func SetupRouter() *gin.Engine {
 		stream := v1.Group("/stream")
 		{
 			stream.GET("/start", controller.StreamStart)
+			stream.GET("/stop", controller.StreamStop)
 		}
 
 	}

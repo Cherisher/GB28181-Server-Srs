@@ -35,3 +35,31 @@ func StreamStart(ctx *gin.Context) {
 
 	ctx.JSON(http.StatusOK, stream)
 }
+
+// StreamStop
+func StreamStop(ctx *gin.Context) {
+	stream := &model.Stream{
+		DeviceID:  ctx.Query("serial"),
+		ChannelID: ctx.Query("code"),
+	}
+
+	if stream.ChannelID == "" || stream.DeviceID == "" {
+		ctx.JSON(http.StatusOK, gin.H{
+			"code": 1001,
+			"msg":  "参数错误",
+		})
+		return
+	}
+
+	err := stream.Stop()
+	if err != nil {
+		ctx.JSON(http.StatusOK, gin.H{
+			"code": 1001,
+			"msg":  "参数错误",
+		})
+		return
+	}
+
+	//ctx.JSON(http.StatusOK, stream)
+	ctx.String(http.StatusOK, "OK")
+}

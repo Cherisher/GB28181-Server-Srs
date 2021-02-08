@@ -57,8 +57,8 @@ func DeviceList() ([]*Device, error) {
 			Online:       true,
 		})
 	}
-	x, err := json.Marshal(devices)
-	fmt.Println(string(x))
+	//x, err := json.Marshal(devices)
+	//fmt.Println(string(x))
 	return devices, nil
 }
 
@@ -70,7 +70,7 @@ func (d *Device) DeviceInfo() error {
 		return err
 	}
 
-	fmt.Println(URL)
+	//fmt.Println(URL)
 	defer resp.Body.Close()
 
 	body, err := ioutil.ReadAll(resp.Body)
@@ -95,7 +95,7 @@ func (d *Device) DeviceInfo() error {
 		} `json:"data"`
 	}
 
-	fmt.Println(string(body))
+	//fmt.Println(string(body))
 	var srsRsp sessionResp
 	if err := json.Unmarshal(body, &srsRsp); err != nil {
 		return err
@@ -110,11 +110,12 @@ func (d *Device) DeviceInfo() error {
 			Online:       true,
 		})
 	}
-	x, err := json.Marshal(devices)
-	fmt.Println(string(x))
+	//x, err := json.Marshal(devices)
+	//fmt.Println(string(x))
 	return nil
 }
 
+// ChannelList 查询设备通道列表
 func (d *Device) ChannelList() ([]*DeviceChannel, error) {
 	URL := config.Config().Srs.APIBase + "/api/v1/gb28181?action=sip_query_session&id=" + d.ID
 	resp, err := http.Get(URL)
@@ -122,7 +123,7 @@ func (d *Device) ChannelList() ([]*DeviceChannel, error) {
 		return nil, err
 	}
 
-	fmt.Println(URL)
+	//fmt.Println(URL)
 	defer resp.Body.Close()
 
 	body, err := ioutil.ReadAll(resp.Body)
@@ -150,20 +151,25 @@ func (d *Device) ChannelList() ([]*DeviceChannel, error) {
 	if err := json.Unmarshal(body, &srsRsp); err != nil {
 		return nil, err
 	}
-	fmt.Println(string(body))
+	// fmt.Println(string(body))
 	if len(srsRsp.Data.Sessions) != 1 {
 		return nil, errors.New("bad response")
 	}
-	fmt.Println(len(srsRsp.Data.Sessions[0].Devices))
+	// fmt.Println(len(srsRsp.Data.Sessions[0].Devices))
 	channels := make([]*DeviceChannel, 0, len(srsRsp.Data.Sessions[0].Devices))
 	for _, channel := range srsRsp.Data.Sessions[0].Devices {
-		channels = append(channels, &DeviceChannel{
+		c := &DeviceChannel{
 			ID:           channel.DeviceID,
 			DeviceID:     d.ID,
 			Name:         channel.DeviceName,
 			DeviceOnline: true,
 			Status:       channel.DeviceStatus,
-		})
+		}
+
+		if channel.InviteStatus == "InviteOk" {
+			c.StreamID = "stream:" + c.DeviceID + ":" + c.ID
+		}
+		channels = append(channels, c)
 	}
 
 	return channels, nil

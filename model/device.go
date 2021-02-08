@@ -32,13 +32,12 @@ type Device struct {
 }
 
 type DeviceChannel struct {
-	ID           string `json:"ID"`           //通道编号
-	DeviceID     string `json:"DeviceID"`     //设备编号
-	DeviceName   string `json:"DeviceName"`   //设备名称
-	DeviceOnline bool   `json:"DeviceOnline"` //设备在线状态
-	Channel      int    `json:"Channel"`      //通道序号
-	Name         string `json:"Name"`         //通道名称
-
+	ID             string `json:"ID"`           //通道编号
+	DeviceID       string `json:"DeviceID"`     //设备编号
+	DeviceName     string `json:"DeviceName"`   //设备名称
+	DeviceOnline   bool   `json:"DeviceOnline"` //设备在线状态
+	Channel        int    `json:"Channel"`      //通道序号
+	Name           string `json:"Name"`         //通道名称
 	Address        string `json:"Address"`
 	Altitude       int    `json:"Altitude"`
 	AudioEnable    bool   `json:"AudioEnable"`

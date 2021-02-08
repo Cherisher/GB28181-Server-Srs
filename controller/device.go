@@ -1,7 +1,6 @@
 package controller
 
 import (
-	"fmt"
 	"net/http"
 	"strconv"
 
@@ -122,7 +121,7 @@ func DeviceChannelList(ctx *gin.Context) {
 		ChannelList  []*model.DeviceChannel `json:"ChannelList"`
 	}
 
-	fmt.Println(q.Serial)
+	//fmt.Println(q.Serial)
 
 	dev := &model.Device{
 		ID: q.Serial,
@@ -130,7 +129,7 @@ func DeviceChannelList(ctx *gin.Context) {
 
 	channels, err := dev.ChannelList()
 	if err != nil {
-		fmt.Println("dev.ChannelList error:", err.Error())
+		//fmt.Println("dev.ChannelList error:", err.Error())
 		ctx.JSON(http.StatusOK, &channelResp{
 			ChannelCount: 0,
 			ChannelList:  make([]*model.DeviceChannel, 0),
