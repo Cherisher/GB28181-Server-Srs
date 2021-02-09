@@ -130,18 +130,11 @@ func Userinfo(ctx *gin.Context) {
 }
 
 func DashboardTop(ctx *gin.Context) {
-	type CPUData struct {
-		Time string  `json:"time"`
-		Use  float64 `json:"use"`
-	}
-	type MemData struct {
-		Time string  `json:"time"`
-		Use  float64 `json:"use"`
-	}
 	type Data struct {
-		CPUData []CPUData `json:"cpuData"`
-		MemData []MemData `json:"memData"`
+		CPU    []*model.ResourceUsage `json:"cpuData"`
+		Memory []*model.ResourceUsage `json:"memData"`
 	}
+
 	type topRsp struct {
 		Code int    `json:"code"`
 		Data Data   `json:"data"`
@@ -152,66 +145,32 @@ func DashboardTop(ctx *gin.Context) {
 		Code: 200,
 		Msg:  "Success",
 		Data: Data{
-			CPUData: []CPUData{
-				0: {
-					Time: "2021-02-07 14:21:48",
-					Use:  0.254364089556053,
-				},
-				1: {
-					Time: "2021-02-07 14:21:49",
-					Use:  0.254364089556053,
-				},
-			},
+			CPU:    model.CPUUsage(),
+			Memory: model.MemUsage(),
 		},
 	}
 
 	ctx.JSON(200, rsp)
 }
 
+// DashboardStore 存储使用
 func DashboardStore(ctx *gin.Context) {
 
-	type Data struct {
-		Name      string `json:"Name"`
-		Unit      string `json:"Unit"`
-		Size      string `json:"Size"`
-		FreeSpace string `json:"FreeSpace"`
-		Used      string `json:"Used"`
-		Percent   string `json:"Percent"`
-		Threshold string `json:"Threshold"`
-	}
 	type storeRsp struct {
-		Code int    `json:"code"`
-		Data []Data `json:"data"`
-		Msg  string `json:"msg"`
+		Code int               `json:"code"`
+		Data []*model.DiskInfo `json:"data"`
+		Msg  string            `json:"msg"`
 	}
 
 	rsp := &storeRsp{
 		Code: 200,
-		Data: []Data{
-			0: {
-				Name:      "/",
-				Unit:      "G",
-				Size:      "39.98",
-				FreeSpace: "34.70",
-				Used:      "5.27",
-				Percent:   "13.19",
-				Threshold: "",
-			},
-			1: {
-				Name:      "/data",
-				Unit:      "G",
-				Size:      "259.97",
-				FreeSpace: "201.88",
-				Used:      "58.09",
-				Percent:   "22.35",
-				Threshold: "",
-			},
-		},
+		Data: model.DiskStore(),
 	}
 
 	ctx.JSON(200, rsp)
 }
 
+// DashboardAuth 获取通道信息
 func DashboardAuth(ctx *gin.Context) {
 	type Data struct {
 		ChannelCount  int `json:"ChannelCount"`
@@ -220,21 +179,44 @@ func DashboardAuth(ctx *gin.Context) {
 		DeviceOnline  int `json:"DeviceOnline"`
 		DeviceTotal   int `json:"DeviceTotal"`
 	}
+
 	type authRsp struct {
 		Code int    `json:"code"`
 		Data Data   `json:"data"`
 		Msg  string `json:"msg"`
 	}
 
+	devicesOnlineCount := 0
+	devicesTotalCount := 0
+	channelOnlineCount := 0
+	channelTotalCount := 0
+
+	devices, _ := model.DeviceList()
+	devicesTotalCount = len(devices)
+	for _, device := range devices {
+		if device.Online == true {
+			devicesOnlineCount++
+		}
+
+		channels, _ := device.ChannelList()
+		channelTotalCount += len(channels)
+
+		for _, channel := range channels {
+			if channel.Status == "ON" {
+				channelOnlineCount++
+			}
+		}
+	}
+
 	rsp := &authRsp{
 		Code: 200,
 		Msg:  "Success",
 		Data: Data{
-			ChannelCount:  10,
-			ChannelOnline: 3,
-			ChannelTotal:  100,
-			DeviceOnline:  1,
-			DeviceTotal:   10,
+			ChannelCount:  0, // 含义未知
+			ChannelOnline: channelOnlineCount,
+			ChannelTotal:  channelTotalCount,
+			DeviceOnline:  devicesOnlineCount,
+			DeviceTotal:   devicesTotalCount,
 		},
 	}
 
